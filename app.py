@@ -15,7 +15,7 @@ except ImportError:
     st.stop()
 
 st.set_page_config(page_title="비요일 프로", page_icon="☔")
-st.title("☔ 비요일 숏폼 제작소 (BGM 페이드 적용)")
+st.title("☔ 비요일 숏폼 제작소 (BGM 페이드 완벽 대응)")
 
 def process_item(file):
     ext = os.path.splitext(file.name)[1].lower()
@@ -38,43 +38,13 @@ bgm = st.file_uploader("배경음악(MP3) - Happy Day 추천", type=['mp3'])
 
 if st.button("✨ 영상 제작"):
     if files and logo:
-        with st.spinner('음악에 페이드 효과를 입혀 제작 중입니다...'):
+        with st.spinner('음악 페이드 인/아웃 적용 중...'):
             try:
                 processed_clips = []
                 for i, f in enumerate(files):
                     clip = process_item(f)
                     if i == 0:
-                        # 첫 장면 블랙 방지: 페이드 인 없이 바로 시작
+                        # 첫 장면 블랙 방지
                         clip = clip.with_effects([vfx.CrossFadeOut(0.5)])
                     else:
-                        clip = clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
-                    processed_clips.append(clip)
-                
-                # 로고 엔딩 (줌 인 효과)
-                l_clip = process_item(logo).with_duration(4.0).with_effects([
-                    vfx.CrossFadeIn(0.5),
-                    vfx.Resize(lambda t: 1 + 0.02 * t)
-                ])
-                processed_clips.append(l_clip)
-                
-                # 영상 합치기
-                final = concatenate_videoclips(processed_clips, method="compose", padding=-0.5)
-                
-                # 오디오 처리 (페이드 인/아웃 적용)
-                if bgm:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as mt:
-                        mt.write(bgm.read())
-                        audio = AudioFileClip(mt.name).with_duration(final.duration)
-                        # 오디오 시작 1초 페이드 인, 끝 2초 페이드 아웃
-                        audio = audio.audio_fadein(1.0).audio_fadeout(2.0)
-                        final = final.set_audio(audio)
-                
-                output_filename = "biyoil_final_audio.mp4"
-                final.write_videofile(output_filename, fps=24, codec="libx264", audio_codec="aac")
-                
-                st.video(output_filename)
-                st.success("🎉 음악까지 완벽한 영상이 완성되었습니다!")
-            except Exception as e:
-                st.error(f"에러 발생: {str(e)}")
-    else:
-        st.error("파일들을 올려줘!")
+                        clip = clip.with_effects([vfx.CrossFad
